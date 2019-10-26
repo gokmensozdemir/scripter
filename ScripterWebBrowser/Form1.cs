@@ -30,7 +30,7 @@ namespace ScripterWebBrowser
         public void InitBrowser()
         {
             Cef.Initialize(new CefSettings());
-            browser = new ChromiumWebBrowser("http://localhost:4200/");
+            browser = new ChromiumWebBrowser("http://services.viases.cloud/");
             this.Controls.Add(browser);
             browser.Dock = DockStyle.Fill;
 
@@ -46,23 +46,22 @@ namespace ScripterWebBrowser
                 if (data.HasValues)
                 {
                     string secret;
-                    string resultCode;
-                    string finishCode;
 
                     try
                     {
-                        secret = data.GetValue("Secret").ToString();
-                        resultCode = data.GetValue("ResultCode").ToString();
-                        finishCode = data.GetValue("FinishCode").ToString();
+                        secret = data.GetValue("Secret").ToString();                        
 
                         if (string.IsNullOrEmpty(secret) || secret != "SECRET_KEY")
                         {
                             return;
                         }
 
-                        // Get result codes here
-                        Console.WriteLine(resultCode);
-                        Console.WriteLine(finishCode);
+                        var resultCode = data.GetValue("ResultCode").ToString();
+
+                        if (!string.IsNullOrEmpty(resultCode))
+                        {
+                            // Sonuç kodu girildi.
+                        }
                     }
                     catch (Exception)
                     {

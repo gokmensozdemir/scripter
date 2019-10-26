@@ -14,14 +14,6 @@ namespace ScripterDemo
         public string username { get; set; }
         public string password { get; set; }
         public string scenario { get; set; }
-        public string direction { get; set; }
-        public string dialId { get; set; }
-        public string guid { get; set; }
-        public string campaignId { get; set; }
-        public string listId { get; set; }
-        public string callId { get; set; }
-        public string agentId { get; set; }
-        public string agentName { get; set; }
         public string currentPhoneNumber { get; set; }
         public Dictionary<string, object> variables { get; set; }
     }
@@ -45,7 +37,7 @@ namespace ScripterDemo
 
             IRestClient restClient = new RestClient();
 
-            IRestRequest request = new RestRequest("https://andromeda.viases.cloud/apiv1/scripterservice/startscripter", Method.POST);
+            IRestRequest request = new RestRequest("http://services.viases.cloud/apiv1/scripterservice/startscripter", Method.POST);
 
             request.AddHeader("content-type", "application/json");
 
@@ -74,22 +66,15 @@ namespace ScripterDemo
             {
                 username = "gokmen",
                 password = "gokmen",
-                scenario = "WebHelpIninTest",
-                direction = "INBOUND",
-                dialId = "1",
-                guid = "2",
-                campaignId = "3",
-                listId = "4",
-                callId = "5",
-                agentId = "6",
-                agentName = "7",
-                currentPhoneNumber = "8",
+                scenario = "WebHelpDemo",
+                currentPhoneNumber = "532",
                 variables = new Dictionary<string, object>
                     {
                         { "IninCallPexId", "9"},
                         { "IninCallId", "10"},
                         { "IninCallIdKey", "11"},
-                        { "IninDnis", "12"}
+                        { "IninDnis", "12"},
+                        { "fieldID", 1 }
                     }
             };
 
