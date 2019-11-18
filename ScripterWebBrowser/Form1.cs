@@ -2,6 +2,7 @@
 using CefSharp.WinForms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ScripterWebBrowser.Service;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -29,12 +30,27 @@ namespace ScripterWebBrowser
         public ChromiumWebBrowser browser;
         public void InitBrowser()
         {
-            Cef.Initialize(new CefSettings());
-            browser = new ChromiumWebBrowser("http://services.viases.cloud/");
-            this.Controls.Add(browser);
-            browser.Dock = DockStyle.Fill;
+            var requestLogin = new RequestLogin
+            {
+                username = "sys.test",
+                password = "sys.test"
+            };
 
-            browser.ConsoleMessage += Browser_ConsoleMessage;
+            try
+            {
+                string token = ScripterService.Login(requestLogin);
+
+                Cef.Initialize(new CefSettings());
+                browser = new ChromiumWebBrowser("http://10.10.55.51/login?token=" + token);
+                this.Controls.Add(browser);
+                browser.Dock = DockStyle.Fill;
+
+                browser.ConsoleMessage += Browser_ConsoleMessage;
+            }
+            catch (Exception ex)
+            {
+                
+            }
         }
 
         private void Browser_ConsoleMessage(object sender, ConsoleMessageEventArgs e)
