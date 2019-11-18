@@ -9,10 +9,20 @@ using System.Threading.Tasks;
 
 namespace ScripterDemo
 {
-    public class RequestModel
+    public class RequestLogin
     {
         public string username { get; set; }
         public string password { get; set; }
+    }
+
+    public class ResponseLogin
+    {
+        public string accessToken { get; set; }
+    }
+
+    public class RequestModel
+    {
+        public string token { get; set; }
         public string scenario { get; set; }
         public string currentPhoneNumber { get; set; }
         public Dictionary<string, object> variables { get; set; }
@@ -21,23 +31,17 @@ namespace ScripterDemo
     public class ResponseModel
     {
         public string message { get; set; }
-        public ResponseData data { get; set; }
-    }
-
-    public class ResponseData
-    {
-        public string token { get; set; }
     }
 
     public class ScripterService
     {
         public static string Start(RequestModel model)
         {
-            string token = null;
+            string message = null;
 
             IRestClient restClient = new RestClient();
 
-            IRestRequest request = new RestRequest("http://services.viases.cloud/apiv1/scripterservice/startscripter", Method.POST);
+            IRestRequest request = new RestRequest("http://10.10.55.51/apiv1/scripterservice/startscripter", Method.POST);
 
             request.AddHeader("content-type", "application/json");
 
@@ -49,10 +53,34 @@ namespace ScripterDemo
             {
                 var responseContent = JsonConvert.DeserializeObject<ResponseModel>(response.Content);
 
-                if (responseContent.data != null)
+                if (responseContent != null)
                 {
-                    token = responseContent.data.token;
+                    message = responseContent.message;
                 }
+            }
+
+            return message;
+        }
+
+        public static string Login(RequestLogin model)
+        {
+            string token = null;
+
+            IRestClient restClient = new RestClient();
+
+            IRestRequest request = new RestRequest("http://10.10.55.51/apiv1/identity/token", Method.POST);
+
+            request.AddHeader("content-type", "application/json");
+
+            request.AddParameter("application/json", JsonConvert.SerializeObject(model), ParameterType.RequestBody);
+
+            IRestResponse response = restClient.Execute(request);
+
+            if (response.ResponseStatus == ResponseStatus.Completed && response.IsSuccessful && response.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                var responseContent = JsonConvert.DeserializeObject<ResponseLogin>(response.Content);
+
+                return responseContent.accessToken;
             }
 
             return token;
@@ -62,27 +90,30 @@ namespace ScripterDemo
     {
         static void Main(string[] args)
         {
+            var requestLogin = new RequestLogin
+            {
+                username = "sys.test",
+                password = "sys.test"
+            };
+
             var requestModel = new RequestModel
             {
-                username = "gokmen",
-                password = "gokmen",
-                scenario = "WebHelpDemo",
-                currentPhoneNumber = "532",
+                scenario = "ACTIVITY_ERCAN_TEST",
+                currentPhoneNumber = "5327004256",
                 variables = new Dictionary<string, object>
                     {
-                        { "IninCallPexId", "9"},
-                        { "IninCallId", "10"},
-                        { "IninCallIdKey", "11"},
-                        { "IninDnis", "12"},
-                        { "fieldID", 1 }
+                        { "is_attr_CallPexID", "3"},
+                        { "agentName", "Gökmen"}
                     }
             };
 
             try
             {
-                string token = ScripterService.Start(requestModel);
+                requestModel.token = ScripterService.Login(requestLogin);
 
-                Console.WriteLine(token);
+                string message = ScripterService.Start(requestModel);
+
+                Console.WriteLine(message);
             }
             catch (Exception ex)
             {
