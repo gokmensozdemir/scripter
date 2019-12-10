@@ -27,7 +27,7 @@ namespace ScripterWebBrowser.Service
 
             IRestClient restClient = new RestClient();
 
-            IRestRequest request = new RestRequest("http://10.10.55.51/apiv1/identity/token", Method.POST);
+            IRestRequest request = new RestRequest("http://services.viases.cloud/apiv1/identity/token", Method.POST);
 
             request.AddHeader("content-type", "application/json");
 

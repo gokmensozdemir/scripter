@@ -15,6 +15,29 @@ using System.Windows.Forms;
 
 namespace ScripterWebBrowser
 {
+    public class CustomMenuHandler : CefSharp.IContextMenuHandler
+    {
+        public void OnBeforeContextMenu(IWebBrowser browserControl, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
+        {
+            model.Clear();
+        }
+
+        public bool OnContextMenuCommand(IWebBrowser browserControl, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
+        {
+
+            return false;
+        }
+
+        public void OnContextMenuDismissed(IWebBrowser browserControl, IBrowser browser, IFrame frame)
+        {
+
+        }
+
+        public bool RunContextMenu(IWebBrowser browserControl, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
+        {
+            return false;
+        }
+    }
     public partial class Form1 : Form
     {
         public Form1()
@@ -32,8 +55,8 @@ namespace ScripterWebBrowser
         {
             var requestLogin = new RequestLogin
             {
-                username = "sys.test",
-                password = "sys.test"
+                username = "gokmen",
+                password = "gokmen"
             };
 
             try
@@ -41,7 +64,8 @@ namespace ScripterWebBrowser
                 string token = ScripterService.Login(requestLogin);
 
                 Cef.Initialize(new CefSettings());
-                browser = new ChromiumWebBrowser("http://10.10.55.51/login?token=" + token);
+                browser = new ChromiumWebBrowser("http://services.viases.cloud/login?token=" + token);
+                browser.MenuHandler = new CustomMenuHandler();
                 this.Controls.Add(browser);
                 browser.Dock = DockStyle.Fill;
 
