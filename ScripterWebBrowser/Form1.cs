@@ -15,34 +15,18 @@ using System.Windows.Forms;
 
 namespace ScripterWebBrowser
 {
-    public class CustomMenuHandler : CefSharp.IContextMenuHandler
-    {
-        public void OnBeforeContextMenu(IWebBrowser browserControl, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model)
-        {
-            model.Clear();
-        }
-
-        public bool OnContextMenuCommand(IWebBrowser browserControl, IBrowser browser, IFrame frame, IContextMenuParams parameters, CefMenuCommand commandId, CefEventFlags eventFlags)
-        {
-
-            return false;
-        }
-
-        public void OnContextMenuDismissed(IWebBrowser browserControl, IBrowser browser, IFrame frame)
-        {
-
-        }
-
-        public bool RunContextMenu(IWebBrowser browserControl, IBrowser browser, IFrame frame, IContextMenuParams parameters, IMenuModel model, IRunContextMenuCallback callback)
-        {
-            return false;
-        }
-    }
     public partial class Form1 : Form
     {
         public Form1()
         {
+
+            Control.CheckForIllegalCrossThreadCalls = false;
             InitializeComponent();
+
+            tabControl1 = new TabControl();
+            this.Controls.Add(this.tabControl1);
+
+            
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -51,6 +35,7 @@ namespace ScripterWebBrowser
         }
 
         public ChromiumWebBrowser browser;
+        public TabControl tabControl1;
         public void InitBrowser()
         {
             var requestLogin = new RequestLogin
@@ -65,11 +50,15 @@ namespace ScripterWebBrowser
 
                 Cef.Initialize(new CefSettings());
                 browser = new ChromiumWebBrowser("http://services.viases.cloud/login?token=" + token);
-                browser.MenuHandler = new CustomMenuHandler();
-                this.Controls.Add(browser);
+                browser.MenuHandler = new CustomMenuHandler();                
                 browser.Dock = DockStyle.Fill;
-
                 browser.ConsoleMessage += Browser_ConsoleMessage;
+
+                string title = "Webhelp Karşılama";
+                TabPage myTabPage = new TabPage(title);
+                myTabPage.Controls.Add(browser);
+                tabControl1.TabPages.Add(myTabPage);
+                tabControl1.Dock = DockStyle.Fill;                
             }
             catch (Exception ex)
             {
@@ -89,21 +78,56 @@ namespace ScripterWebBrowser
 
                     try
                     {
-                        secret = data.GetValue("Secret").ToString();                        
+                        secret = data.GetValue("secret").ToString();                        
 
                         if (string.IsNullOrEmpty(secret) || secret != "SECRET_KEY")
                         {
                             return;
                         }
 
-                        var resultCode = data.GetValue("ResultCode").ToString();
+                        string type = data.GetValue("type").ToString();
 
-                        if (!string.IsNullOrEmpty(resultCode))
+                        if (type == "RESULT_CODE")
                         {
-                            // Sonuç kodu girildi.
+                            var resultCode = data.GetValue("ResultCode").ToString();
+
+                            if (!string.IsNullOrEmpty(resultCode))
+                            {
+                                // Sonuç kodu girildi.
+                            }
+                        }
+                        else if(type == "CRM_PAGE")
+                        {
+                            string title = data.GetValue("title").ToString();
+                            string url = data.GetValue("url").ToString();
+                            string id = data.GetValue("id").ToString();
+
+                            foreach (TabPage tabPage in this.tabControl1.TabPages)
+                            {
+                                if (tabPage.Name == id)
+                                {
+                                    return;
+                                }
+                            }
+
+                            ChromiumWebBrowser crmPage = new ChromiumWebBrowser(url);
+                            crmPage.MenuHandler = new CustomMenuHandler();
+                            crmPage.Dock = DockStyle.Fill;
+
+                            if (this.InvokeRequired)
+                            {
+                                this.BeginInvoke((MethodInvoker)delegate ()
+                                {
+                                    TabPage myTabPage = new TabPage(title);
+                                    myTabPage.Name = id;
+                                    myTabPage.Controls.Add(crmPage);
+                                    this.tabControl1.TabPages.Add(myTabPage);
+                                    this.tabControl1.Dock = DockStyle.Fill;
+                                });
+                            }
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
 
                     }
@@ -137,5 +161,6 @@ namespace ScripterWebBrowser
                 return false;
             }
         }
+
     }
 }
